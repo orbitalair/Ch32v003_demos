@@ -24,7 +24,7 @@ TARGET_MCU?=CH32V003
 TARGET_EXT?=c
 
 CH32V003FUN?=$(dir $(lastword $(MAKEFILE_LIST)))
-MINICHLINK?=$(CH32V003FUN)/../minichlink
+MINICHLINK?=../$(CH32V003FUN)/minichlink
 
 WRITE_SECTION?=flash
 SYSTEM_C?=$(CH32V003FUN)/ch32v003fun.c
@@ -182,7 +182,8 @@ CFLAGS+= \
 	-I$(CH32V003FUN)/../extralibs \
 	-I$(CH32V003FUN) \
 	-nostdlib \
-	-I. -Wall $(EXTRA_CFLAGS)
+	-I. -Wall $(EXTRA_CFLAGS) 
+	
 
 LDFLAGS+=-T $(LINKER_SCRIPT) -Wl,--gc-sections
 FILES_TO_COMPILE:=$(SYSTEM_C) $(TARGET).$(TARGET_EXT) $(ADDITIONAL_C_FILES) 
