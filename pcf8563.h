@@ -30,9 +30,10 @@
 
 /* the read and write values for pcf8563 rtcc */
 /* these are adjusted for arduino */
-#define RTCC_R 	0xa3  //a3
-#define RTCC_W 	0xa2  //a2
-
+//#define RTCC_R 	0xa3  //a3
+//#define RTCC_W 	0xa2  //a2
+#define RTCC_ADDR    0x51  //top 7 bits or 0xa2>>1
+// the i2c lib auto adds the last 0 or 1 bit for read or write
 #define RTCC_SEC 		1
 #define RTCC_MIN 		2
 #define RTCC_HR 		3
@@ -120,23 +121,23 @@ uint8_t bcdToDec(uint8_t val)
 
 
 /* zero out all values, disable all alarms */
-void pcf8563_init(void)		
+uint8_t pcf8563_init(void)		
 {
-	uint8_t addr=RTCC_W>>1;  /*i2c lib wants the 7bit addr*/
+	uint8_t addr=RTCC_ADDR;  /*i2c lib wants the 7bit addr*/
 	uint8_t reg=0x0;
 	const uint8_t buf[]={0x0,0x0,0x0,0x14,0x17,0x22,0x06,0x12,0x24,0x80,0x80,0x80,0x80,0x0,0x0};
 	err=0;
 
-	err= i2c_write(addr,reg,buf,15);
-	if (err > 0) { printf("err rtc init: %d\n",err); }
+	return i2c_write(addr,reg,buf,15);
+	//if (err > 0) { printf("err rtc init: %d\n",err); }
 }
 
 /* read 5 bytes and get the 2 status values and the time data */
-void pcf8563_get_time()
+uint8_t pcf8563_get_time()
 {
 	uint8_t buf[5]={0,0,0,0,0};
 	err=0;
-	err = i2c_read(RTCC_W>>1,RTCC_STAT1_ADDR,buf, 5);
+	err = i2c_read(RTCC_ADDR,RTCC_STAT1_ADDR,buf, 5);
 	if (err == 0){
 		status1=buf[0];
 		status2=buf[1];
@@ -145,21 +146,24 @@ void pcf8563_get_time()
 		minute = bcdToDec(buf[3] & 0x7f);
 		//0x3f = 0b00111111
 		hour = bcdToDec(buf[4] & 0x3f);
+        return 0;
 	}
-	else { printf("error reading time, code:%d\n",err); }
+	else { 
+        return err; 
+    }
 }
 
-void pcf8563_print_time()
-{
-	printf("%d:%d:%d\n", hour, minute, sec);
-}
+// void pcf8563_print_time()
+// {
+// 	printf("%d:%d:%d\n", hour, minute, sec);
+// }
 
 /* read 4 bytes and translate the date values */
 void pcf8563_get_date()
 {
 	uint8_t buf[4]={0,0,0,0};
 	err=0;
-	err = i2c_read(RTCC_W>>1,RTCC_DAY_ADDR,buf, 4);
+	err = i2c_read(RTCC_ADDR,RTCC_DAY_ADDR,buf, 4);
 	 //0x3f = 0b00111111
     day = bcdToDec(buf[0] & 0x3f);
     //0x07 = 0b00000111
@@ -178,10 +182,10 @@ void pcf8563_get_date()
 	year = bcdToDec(buf[3]);
 }
 
-void pcf8563_print_date()
-{
-	printf(" %d:%d:%d\n", month, day, year);
-}
+// void pcf8563_print_date()
+// {
+// 	printf(" %d:%d:%d\n", month, day, year);
+// }
 
 
 char *pcf8563_format_time(uint8_t style)
@@ -283,6 +287,36 @@ char *pcf8563_format_date(uint8_t style)
 
     }
     return strDate;
+}
+
+/* enable alarm interrupt
+ * whenever the clock matches these values an int will
+ * be sent out pin 3 of the Pcf8563 chip
+ * returns:  err code
+ */
+uint8_t pcf8563_enable_alarm()
+{
+
+    //set status2 AF val to zero
+    status2 &= ~RTCC_ALARM_AF;
+    //enable the interrupt
+    status2 |= RTCC_ALARM_AIE;
+
+    //enable the interrupt
+    //Wire.beginTransmission(Rtcc_Addr);  // Issue I2C start signal
+    //Wire.write((byte)RTCC_STAT2_ADDR);
+    //Wire.write((byte)status2);
+    //Wire.endTransmission();
+
+    const uint8_t buf[]={status2};
+    return i2c_write(RTCC_ADDR,RTCC_STAT2_ADDR,buf,1);
+	//if (err > 0) { printf("err rtc enable alarm: %d\n",err); }
+}
+
+uint8_t pcf8563_alarm_enabled()
+{
+    // the dtatus2 byte is updated at each get_time read
+    return status2 & RTCC_ALARM_AIE;
 }
 
 #endif

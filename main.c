@@ -26,8 +26,7 @@ int main()
 {
 	SystemInit();
 
-
-		// Initialise the I2C Interface on the selected pins, at the specified Hz.
+	// Initialise the I2C Interface on the selected pins, at the specified Hz.
 	// Enter a clock speed in Hz (Weirdness happens below 10,000), or use one
 	// of the pre-defined clock speeds:
 	// I2C_CLK_10KHZ    I2C_CLK_50KHZ    I2C_CLK_100KHZ    I2C_CLK_400KHZ
@@ -45,18 +44,9 @@ int main()
 	i2c_scan(i2c_scan_callback);
 	printf("----Done Scanning----\n\n");
 
-	/*** Example ***/
-	// This example is specifically for the DS3231 I2C RTC Module.
-	// Use this as an example for generic devices, changing Address, speed etc
-	//i2c_err_t i2c_stat;
-
 	pcf8563_init();	
 	printf("clock set...\n");
-	//show_oled();
-	//if(!ssd1306_i2c_init())
-	//{
 	ssd1306_init();
-	//}
 	// Enable GPIOD, C and ADC
 	RCC->APB2PCENR |= RCC_APB2Periph_GPIOC | RCC_APB2Periph_ADC1;
 
@@ -65,11 +55,6 @@ int main()
 
 	while(1)
 	{
-		//printf("I2C Test");
-		//pcf8563_get_time();
-		//pcf8563_print_time();
-		//pcf8563_get_date();
-		//pcf8563_print_date();
 		ssd1306_drawstr_sz(0,0, "[] Date Reminder", 1, fontsize_8x8);
 		ssd1306_drawstr_sz(0,20, pcf8563_format_time(RTCC_TIME_HMS), 1, fontsize_16x16);
 		ssd1306_drawstr_sz(0,48, pcf8563_format_date(RTCC_DATE_US), 1, fontsize_8x8);
