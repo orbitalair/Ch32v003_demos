@@ -47,11 +47,14 @@ int main()
 	pcf8563_init();	
 	printf("clock set...\n");
 	ssd1306_init();
-	// Enable GPIOD, C and ADC
+	/* configure touch pins, Enable GPIOD, C and ADC */
 	RCC->APB2PCENR |= RCC_APB2Periph_GPIOC | RCC_APB2Periph_ADC1;
-
 	InitTouchADC();
 	uint32_t but[4] = { 0 };
+
+	/* test set alarm */
+	pcf8563_set_alarm(1,2,3,4);
+	pcf8563_get_alarm();
 
 	while(1)
 	{
@@ -62,9 +65,12 @@ int main()
 
 		int iterations = 3;
 		but[0] = ReadTouchPin( GPIOC, 4, 2, iterations );
-		printf("but[0]=%ld\n",but[0]);
-		if (but[0]>5500) { printf("cap button pressed"); }
-
+		//printf("but[0]=%ld\n",but[0]);
+		if (but[0]>5500) { 
+			printf("cap button pressed\n"); 
+			pcf8563_format_alarm();
+			pcf8563_format_status();
+		}
 		Delay_Ms(300);
 	}
 	return(0);
