@@ -4,7 +4,9 @@
 A library file for the PCF8563.  This h file library was
 taken from my Arduino class file design.  I simplified 
 a lot of the functions in order to fit into the 16kb 
-flash to be able to add other features like touch buttons.  
+flash.
+
+I also wanted to be able to add other features like touch buttons.  
 
 
 # Features
@@ -16,10 +18,10 @@ support mk file.  My system did not like the riscv-linux toolchain. I had to use
 
 # Additional libraries
 
-1.  lib_i2c from here:  
+1.  lib_i2c from here:  https://github.com/ADBeta/CH32V000x-lib_i2c  
 Simply copy the .h and .c file to the project folder.  
 2. the ssd1306_i2c.h and ssd1306.h files.  I have modified the ssd1306_i2c.h 
-to use the lib_i2c and not initialise the i2c bus again.
+to use the lib_i2c and not initialise the i2c bus again.  font_8x8.h is copied over also.
 3. ch32v003_touch.h  
 I copied the touch header from the adc touch project to this location.  
 

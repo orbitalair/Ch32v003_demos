@@ -2,8 +2,8 @@
 ifeq ($(OS),Windows_NT)
     PREFIX?=riscv64-unknown-elf
 # Check if riscv64-linux-gnu-gcc exists
-#else ifneq ($(shell which riscv64-linux-gnu-gcc),)
-#    PREFIX?=riscv64-linux-gnu
+else ifneq ($(shell which riscv64-linux-gnu-gcc),)
+    PREFIX?=riscv64-linux-gnu
 # Check if riscv64-unknown-elf-gcc exists
 else ifneq ($(shell which riscv64-unknown-elf-gcc),)
     PREFIX?=riscv64-unknown-elf
@@ -34,7 +34,7 @@ ifeq ($(DEBUG),1)
 endif
 
 CFLAGS?=-g -Os -flto -ffunction-sections -fdata-sections -fmessage-length=0 -msmall-data-limit=8
-LDFLAGS+=-Wl,--print-memory-usage
+LDFLAGS+=-Wl,--print-memory-usage,-Map=$(TARGET).map
 
 ifeq ($(TARGET_MCU),CH32V003)
 	CFLAGS_ARCH+=-march=rv32ec -mabi=ilp32e -DCH32V003=1
