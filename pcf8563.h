@@ -7,6 +7,7 @@
  *  CREATION DATE
  *    12/28/2024,  init - built off of arduino rtc code
  *  NOTES
+ *    PCF8563 Datasheet: https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf
  *  HISTORY
  *  TODO
  ******
@@ -117,7 +118,8 @@ uint8_t check(uint8_t value, uint8_t min, uint8_t max)
 }
 
 
-/* Zero out all values, disable all alarms 
+/* Zero out all values, disable all alarms. 
+   Requires that the I2C bus is enabled.
    returns i2c_err */
 uint8_t pcf8563_init(void)		
 {
@@ -284,13 +286,19 @@ char *pcf8563_format_date(uint8_t style)
 }
 
 /* Set the square wave pin output
-   use SQW_DISABLE to disable the output*/
+   use SQW_DISABLE to disable the output
+   returns i2c_err or -1 if input out of bounds. */
 uint8_t pcf8563_set_squarewave(uint8_t frequency)
 {
-    /* TODO: verify the input value */
-    const uint8_t buf[1]={frequency};
-    return i2c_write(RTCC_ADDR,RTCC_SQW_ADDR,buf,1);
-
+    /* verify the input value */
+    if (frequency == SQW_1024HZ || frequency == SQW_1HZ || 
+        frequency == SQW_32HZ || frequency == SQW_32KHZ ||
+        frequency == SQW_DISABLE)
+    {
+        const uint8_t buf[1]={frequency};
+        return i2c_write(RTCC_ADDR,RTCC_SQW_ADDR,buf,1);
+    }
+    return -1;
 }
 
 /* Enable alarm interrupt
@@ -325,7 +333,7 @@ uint8_t pcf8563_alarm_active()
 
 
 /* General function to set or clear the alarm bit
-   Set to out of bounds value to clear the alarm */
+   Set to out of bounds value to clear the alarm (or RTCC_NO_ALARM)*/
 uint8_t set_alarm_bit(uint8_t value, uint8_t min, uint8_t max)
 {
     if (check(value, min, max))
@@ -334,7 +342,8 @@ uint8_t set_alarm_bit(uint8_t value, uint8_t min, uint8_t max)
         value &= ~RTCC_ALARM;
     }
     else {
-        value = 0x0; value |= RTCC_ALARM;
+        value = 0x0; 
+        value |= RTCC_ALARM;
     }
     return value;
 }

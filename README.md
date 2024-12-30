@@ -8,6 +8,7 @@ flash.
 
 I also wanted to be able to add other features like touch buttons.  
 
+Pcf8563 Datasheet:  https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf  
 
 # Features
 

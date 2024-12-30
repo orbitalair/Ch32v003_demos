@@ -56,6 +56,10 @@ int main()
 	pcf8563_set_alarm(1,2,3,4);
 	pcf8563_get_alarm();
 
+	pcf8563_set_squarewave(SQW_DISABLE);
+
+	printf("Alarm enabled: %d, active: %d\n",pcf8563_alarm_enabled(), pcf8563_alarm_active());
+	
 	while(1)
 	{
 		ssd1306_drawstr_sz(0,0, "[] Date Reminder", 1, fontsize_8x8);
@@ -70,6 +74,9 @@ int main()
 			printf("cap button pressed\n"); 
 			pcf8563_format_alarm();
 			pcf8563_format_status();
+			//pcf8563_clear_status();
+			pcf8563_clear_alarm();
+			pcf8563_set_squarewave(SQW_1024HZ);	
 		}
 		Delay_Ms(300);
 	}
