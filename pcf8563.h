@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "lib_i2c.h"
+/* TODO: add support for timer function. */
 
 /* The 7 bit addr for pcf8563 rtc 
    The i2c lib auto adds the last 0 or 1 bit for read or write */
