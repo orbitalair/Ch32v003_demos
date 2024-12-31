@@ -1,6 +1,6 @@
 /*****
  *  NAME
- *    External Real Time Clock support routines
+ *    PCF8563 Real Time Clock support routines for ch32vv003fun
  *  AUTHOR
  *    Joe Robertson, jmr
  *    orbitalair@gmail.com
@@ -10,6 +10,7 @@
  *    PCF8563 Datasheet: https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf
  *  HISTORY
  *  TODO
+ *    Add timer routines
  ******
  *  Robodoc embedded documentation.
  *  http://www.xs4all.nl/~rfsber/Robo/robodoc.html
@@ -21,37 +22,20 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "lib_i2c.h"
-/* TODO: add support for timer function. */
 
 /* The 7 bit addr for pcf8563 rtc 
    The i2c lib auto adds the last 0 or 1 bit for read or write */
 #define RTCC_ADDR    0x51  
 
-// #define RTCC_SEC 		1
-// #define RTCC_MIN 		2
-// #define RTCC_HR 		3
-// #define RTCC_DAY 		4
-// #define RTCC_WEEKDAY	5
-// #define RTCC_MONTH 		6
-// #define RTCC_YEAR 		7
-// #define RTCC_CENTURY 	8
-
 /* register addresses in the rtc */
 #define RTCC_STAT1_ADDR			0x0
 #define RTCC_STAT2_ADDR			0x01
-// #define RTCC_SEC_ADDR  			0x02
-// #define RTCC_MIN_ADDR 			0x03
-// #define RTCC_HR_ADDR 			0x04
 #define RTCC_DAY_ADDR 			0x05
-// #define RTCC_WEEKDAY_ADDR		0x06
-// #define RTCC_MONTH_ADDR 		0x07
-// #define RTCC_YEAR_ADDR 			0x08
 #define RTCC_ALRM_MIN_ADDR 	    0x09
 #define RTCC_SQW_ADDR 	        0x0D
 
 /* Setting the alarm flag to 0 enables the alarm.
- * Set it to 1 to disable the alarm for that value.
- */
+   Set it to 1 to disable the alarm for that value. */
 #define RTCC_ALARM				0x80
 #define RTCC_ALARM_AIE 			0x02
 #define RTCC_ALARM_AF 			0x08 // 0x08 : not 0x04!!!!
@@ -68,16 +52,13 @@
 #define RTCC_TIME_HMS			0x01
 #define RTCC_TIME_HM			0x02
 
-/* square wave contants */
+/* square wave contants, CLK_OUT */
 #define SQW_DISABLE     0b00000000
 #define SQW_32KHZ       0b10000000
 #define SQW_1024HZ      0b10000001
 #define SQW_32HZ        0b10000010
 #define SQW_1HZ         0b10000011
 
-/* methods */
-uint8_t decToBcd(uint8_t value);
-uint8_t bcdToDec(uint8_t value);
 /* time variables */
 uint8_t hour;
 uint8_t minute;
@@ -95,18 +76,22 @@ uint8_t alarm_day;
 uint8_t status1;
 uint8_t status2;
 uint8_t century;
-
+/* to output a formatted string */
 char strOut[9];
 char strDate[11];
-/* global error status */
+/* global error status from i2c lib */
 i2c_err_t err;
 
-/* Private internal functions, but useful to look at if you need a similar func. */
+/* Pcf8563 uses binary coded decimal for the registers
+   see the datasheet  */
+
+/* Decimal to Binary coded decimal */   
 uint8_t decToBcd(uint8_t val)
 {
   return ( (val/10*16) + (val%10) );
 }
 
+/* Binary coded decimal to decimal */
 uint8_t bcdToDec(uint8_t val)
 {
   return ( (val/16*10) + (val%16) );
@@ -137,9 +122,10 @@ uint8_t pcf8563_clear_status()
     return i2c_read(RTCC_ADDR,RTCC_STAT1_ADDR,buf, 2);
 }
 
+/* Print the 2 status bytes values */
 void pcf8563_format_status()
 {
-    printf("status1: %04x, status2: %04x\n",status1, status2);
+    printf("Status1: 0x%02x, Status2: 0x%02x\n",status1, status2);
 }
 
 /* Read 5 bytes and get the 2 status values and the time data */
@@ -185,6 +171,7 @@ void pcf8563_get_date()
 	year = bcdToDec(buf[3]);
 }
 
+/* Print the time in a format style, HM or HMS */
 char *pcf8563_format_time(uint8_t style)
 {
     pcf8563_get_time();
@@ -213,6 +200,7 @@ char *pcf8563_format_time(uint8_t style)
     return strOut;
 }
 
+/* Print the data in a format style, Asia, USA, and World */
 char *pcf8563_format_date(uint8_t style)
 {
     pcf8563_get_date();
@@ -318,7 +306,7 @@ uint8_t pcf8563_enable_alarm()
     return i2c_write(RTCC_ADDR,RTCC_STAT2_ADDR,buf,1);
 }
 
-/* check if the alarm is enabled
+/* Check if the alarm is enabled
    returns 1 if enabled, 0 disabled */
 uint8_t pcf8563_alarm_enabled()
 {
@@ -401,9 +389,10 @@ uint8_t pcf8563_get_alarm()
     return err; 
 }
 
+/* Print the alarm data bytes */
 void pcf8563_format_alarm()
 {
-    printf("alarm:  %d:%d day: %d  weekday:%d\n",alarm_hour,alarm_minute,alarm_day,alarm_weekday);
+    printf("Alarm: %02d:%02d day:%d  weekday:%d\n",alarm_hour,alarm_minute,alarm_day,alarm_weekday);
 }
 
 /* Reset the alarm leaving interrupt unchanged */
