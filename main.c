@@ -81,6 +81,7 @@ int main()
 		int iterations = 3;
 		but[0] = ReadTouchPin( GPIOC, 4, 2, iterations );
 		/* attach a probe wire to PC4, when you touch it, it should trigger this section of code */
+		/* print but[0] to the screen if it isnt working to see your cap touch raw values */
 		if (but[0]>5500) { 
 			printf("cap button pressed\n"); 
 			pcf8563_format_alarm();  /*print alarm bytes*/
