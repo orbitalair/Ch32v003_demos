@@ -9,7 +9,7 @@
 
    This file build to this size on my Ubuntu 24 linux system:	
    Memory region         Used Size  Region Size  %age Used
-           FLASH:        7996 B        16 KB     48.80%
+           FLASH:        8012 B        16 KB     48.90%
              RAM:        1468 B         2 KB     71.68%
 
 */
