@@ -35,7 +35,7 @@
 #ifndef CH32_LIB_I2C_H
 #define CH32_LIB_I2C_H
 
-#include "ch32v003fun.h"
+#include "ch32fun.h"
 
 // TESTED: DEFAULT OK	ALT_1 OK
 #define I2C_PINOUT_DEFAULT

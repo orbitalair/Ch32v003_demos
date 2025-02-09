@@ -19,7 +19,7 @@
 /*#define SSD1306_128X32*/
 #define SSD1306_128X64
 
-#include "ch32v003fun.h"
+#include "ch32fun.h"
 #include "lib_i2c.h"
 #include "pcf8563.h"
 #include <stdio.h>
