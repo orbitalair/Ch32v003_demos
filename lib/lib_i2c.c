@@ -175,7 +175,80 @@ void i2c_scan(void (*callback)(const uint8_t))
 }
 
 
-i2c_err_t i2c_read(const uint8_t addr,		const uint8_t reg,
+i2c_err_t i2c_read(const uint8_t addr, const uint8_t reg, uint8_t *buf, const uint8_t len)
+{
+	i2c_err_t i2c_ret = I2C_OK;
+
+	// Wait for the bus to become not busy - set state to I2C_ERR_TIMEOUT on failure
+	int32_t timeout = I2C_TIMEOUT;
+	while(I2C1->STAR2 & I2C_STAR2_BUSY) 
+		if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+	
+	if(i2c_ret == I2C_OK)
+	{
+		// Send a START Signal and wait for it to assert
+		I2C1->CTLR1 |= I2C_CTLR1_START;
+		while(!i2c_status(I2C_EVENT_MASTER_MODE_SELECT));
+
+		// Send the Address and wait for it to finish transmitting
+		timeout = I2C_TIMEOUT;
+		I2C1->DATAR = (addr << 1) & 0xFE;
+		while(!i2c_status(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
+			if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+	}
+
+	if(i2c_ret == I2C_OK)
+	{
+		
+		// Send the Register Byte or just low byte
+		I2C1->DATAR = reg ;
+		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+		
+		
+		// If the message is long enough, enable ACK messages
+		if(len > 1) I2C1->CTLR1 |= I2C_CTLR1_ACK;
+
+		// Send a Repeated START Signal and wait for it to assert
+		I2C1->CTLR1 |= I2C_CTLR1_START;
+		while(!i2c_status(I2C_EVENT_MASTER_MODE_SELECT));
+
+		// Send Read Address
+		timeout = I2C_TIMEOUT;
+		I2C1->DATAR = (addr << 1) | 0x01;
+		while(!i2c_status(I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
+			if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+
+		
+	}
+
+	if(i2c_ret == I2C_OK)
+	{
+		// Read bytes
+		uint8_t cbyte = 0;
+		while(cbyte < len)
+		{
+			// If this is the last byte, send the NACK Bit
+			if(cbyte == len) I2C1->CTLR1 &= ~I2C_CTLR1_ACK;
+
+			// Wait until the Read Register isn't empty
+			while(!(I2C1->STAR1 & I2C_STAR1_RXNE));
+			buf[cbyte] = I2C1->DATAR;
+
+			// Make sure no errors occured
+			if((i2c_ret = i2c_error()) != I2C_OK) break;
+
+			++cbyte;
+		}
+	}
+
+	// Send the STOP Condition to auto-reset for the next operation
+	I2C1->CTLR1 |= I2C_CTLR1_STOP;
+
+	return i2c_ret;
+}
+
+/* read i2c data from a device using 2 bytes as register address */
+i2c_err_t i2c_read_2ba(const uint8_t addr,	const uint8_t reglow, const uint8_t reghi,
 											uint8_t *buf,
 											const uint8_t len)
 {
@@ -201,10 +274,14 @@ i2c_err_t i2c_read(const uint8_t addr,		const uint8_t reg,
 
 	if(i2c_ret == I2C_OK)
 	{
+		// Send high byte
 		// Send the Register Byte
-		I2C1->DATAR = reg;
+		I2C1->DATAR = reghi;
 		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
-
+		I2C1->DATAR = reglow;
+		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+		
+		
 		// If the message is long enough, enable ACK messages
 		if(len > 1) I2C1->CTLR1 |= I2C_CTLR1_ACK;
 
@@ -217,6 +294,8 @@ i2c_err_t i2c_read(const uint8_t addr,		const uint8_t reg,
 		I2C1->DATAR = (addr << 1) | 0x01;
 		while(!i2c_status(I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED))
 			if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+
+		
 	}
 
 	if(i2c_ret == I2C_OK)
@@ -246,7 +325,51 @@ i2c_err_t i2c_read(const uint8_t addr,		const uint8_t reg,
 }
 
 
-i2c_err_t i2c_write(const uint8_t addr,		const uint8_t reg,
+i2c_err_t i2c_write(const uint8_t addr,	const uint8_t reg, const uint8_t *buf, const uint8_t len)
+{
+	i2c_err_t i2c_ret = I2C_OK;
+
+	// Wait for the bus to become not busy - set state to I2C_ERR_TIMEOUT on failure
+	int32_t timeout = I2C_TIMEOUT;
+	while(I2C1->STAR2 & I2C_STAR2_BUSY) 
+		if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+	if(i2c_ret == I2C_OK)
+	{
+		// Send a START Signal and wait for it to assert
+		I2C1->CTLR1 |= I2C_CTLR1_START;
+		while(!i2c_status(I2C_EVENT_MASTER_MODE_SELECT));
+		// Send the Address and wait for it to finish transmitting
+		timeout = I2C_TIMEOUT;
+		I2C1->DATAR = (addr << 1) & 0xFE;
+		while(!i2c_status(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
+			if(--timeout < 0) {i2c_ret = i2c_get_busy_error(); break;}
+	}
+	if(i2c_ret == I2C_OK)
+	{
+		// Send the Register Byte 
+		I2C1->DATAR = reg & 0x00FF;
+		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+		// Write bytes
+		uint8_t cbyte = 0;
+		while(cbyte < len)
+		{
+			// Write the byte and wait for it to finish transmitting
+			while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+			I2C1->DATAR = buf[cbyte];
+			// Make sure no errors occured
+			if((i2c_ret = i2c_error()) != I2C_OK) break;
+			++cbyte;
+		}
+		// Wait for the bus to finish transmitting
+		while(!i2c_status(I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+	}
+	// Send a STOP Condition, to aut-reset for the next operation
+	I2C1->CTLR1 |= I2C_CTLR1_STOP;
+	return i2c_ret;
+}
+
+/* write i2c using 2 byte register address */
+i2c_err_t i2c_write_2ba(const uint8_t addr,	const uint8_t reglow, const uint8_t reghi,
 											const uint8_t *buf,
 											const uint8_t len)
 {
@@ -274,9 +397,12 @@ i2c_err_t i2c_write(const uint8_t addr,		const uint8_t reg,
 	if(i2c_ret == I2C_OK)
 	{
 		// Send the Register Byte
-		I2C1->DATAR = reg;
 		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
-
+		I2C1->DATAR = reghi;
+		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+		I2C1->DATAR = reglow;
+		while(!(I2C1->STAR1 & I2C_STAR1_TXE));
+		
 		// Write bytes
 		uint8_t cbyte = 0;
 		while(cbyte < len)

@@ -85,7 +85,7 @@ int main()
 	   of the pre-defined clock speeds:
 	   I2C_CLK_10KHZ    I2C_CLK_50KHZ    I2C_CLK_100KHZ    I2C_CLK_400KHZ
 	   I2C_CLK_500KHZ   I2C_CLK_600KHZ   I2C_CLK_750KHZ    I2C_CLK_1MHZ  */
-	if(i2c_init(I2C_CLK_100KHZ) != I2C_OK) printf("Failed to init the I2C Bus\n");
+	if(i2c_init(I2C_CLK_400KHZ) != I2C_OK) printf("Failed to init the I2C Bus\n");
 
 	/* Initialising I2C causes the pins to transition from LOW to HIGH.
 	   Wait 100ms to allow the I2C Device to timeout and ignore the transition.

@@ -42,6 +42,8 @@
 //#define I2C_PINOUT_ALT_1
 //#define I2C_PINOUT_ALT_2
 
+//#define TWOBYTEADDR 1    // use 2 bytes for the data address
+
 /*** Hardware Definitions ****************************************************/
 // Predefined Clock Speeds
 #define I2C_CLK_10KHZ  10000
@@ -120,6 +122,10 @@ i2c_err_t i2c_read(const uint8_t addr,	const uint8_t reg,
 										uint8_t *buf,
 										const uint8_t len);
 
+i2c_err_t i2c_read_2ba(const uint8_t addr,	const uint8_t reglow, const uint8_t reghi,
+											uint8_t *buf,
+											const uint8_t len);
+
 /// @brief writes [len] bytes from [buf], to the [reg] of [addr]
 /// @param addr, Address of the I2C Device to Write to, MUST BE 7 Bit
 /// @param buf, Buffer to write from
@@ -127,6 +133,9 @@ i2c_err_t i2c_read(const uint8_t addr,	const uint8_t reg,
 /// @return i2c_err_t. I2C_OK On Success.
 i2c_err_t i2c_write(const uint8_t addr,	const uint8_t reg,
 										const uint8_t *buf,
+										const uint8_t len);
+
+i2c_err_t i2c_write_2ba(const uint8_t addr,	const uint8_t reglow, const uint8_t reghi, const uint8_t *buf,
 										const uint8_t len);
 
 #endif
