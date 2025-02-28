@@ -10,10 +10,10 @@
 * See GitHub Repo for more information: 
 * https://github.com/ADBeta/CH32V000x-lib_i2c
 *
-* 29 Aug 2024	Version 3.3
+* 24 Feb 2025    Ver 3.4
 *
 * Released under the MIT Licence
-* Copyright ADBeta (c) 2024
+* Copyright ADBeta (c) 2024 - 2025
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to
@@ -123,7 +123,7 @@ i2c_err_t i2c_read(const uint8_t addr,	const uint8_t reg,
 /// @brief writes [len] bytes from [buf], to the [reg] of [addr]
 /// @param addr, Address of the I2C Device to Write to, MUST BE 7 Bit
 /// @param reglow, Low byte of 2 byte address
-/// @param buf, High byte of 2 byte address
+/// @param reghi, High byte of 2 byte address
 /// @param buf, Buffer to read into
 /// @param len, number of bytes to read
 /// @return i2c_err_t. I2C_OK On Success.
@@ -144,7 +144,7 @@ i2c_err_t i2c_write(const uint8_t addr,	const uint8_t reg,
 /// @brief writes [len] bytes from [buf], to the [reg] of [addr]
 /// @param addr, Address of the I2C Device to Write to, MUST BE 7 Bit
 /// @param reglow, Low byte of 2 byte address
-/// @param buf, High byte of 2 byte address
+/// @param reghi, High byte of 2 byte address
 /// @param buf, Buffer to write from
 /// @param len, number of bytes to write
 /// @return i2c_err_t. I2C_OK On Success.

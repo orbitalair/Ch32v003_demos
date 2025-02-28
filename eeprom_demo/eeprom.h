@@ -45,7 +45,7 @@ uint8_t eep_write(uint16_t addr, uint8_t *buf, uint8_t bufsize)
         /* adjust the number of bytes to write */
         testsize = EEP_PGSZ - (addr % EEP_PGSZ);
         if (testsize > bufsize){  /*then this data will fit */
-            printf("testsize, adusted:%d\n",testsize);
+            printf("testsize, adjusted:%d\n",testsize);
         }
         else {  /* the buf data wont fit which may cause strange results */
             return 253;

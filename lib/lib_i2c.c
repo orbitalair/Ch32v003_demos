@@ -11,7 +11,7 @@
 * https://github.com/ADBeta/CH32V000x-lib_i2c
 *
 * Released under the MIT Licence
-* Copyright ADBeta (c) 2024
+* Copyright ADBeta (c) 2024 - 2025
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to
@@ -228,7 +228,7 @@ i2c_err_t i2c_read(const uint8_t addr, const uint8_t reg, uint8_t *buf, const ui
 		while(cbyte < len)
 		{
 			// If this is the last byte, send the NACK Bit
-			if(cbyte == len) I2C1->CTLR1 &= ~I2C_CTLR1_ACK;
+			if(cbyte == len - 1) I2C1->CTLR1 &= ~I2C_CTLR1_ACK;
 
 			// Wait until the Read Register isn't empty
 			while(!(I2C1->STAR1 & I2C_STAR1_RXNE));
@@ -305,7 +305,7 @@ i2c_err_t i2c_read_2ba(const uint8_t addr,	const uint8_t reglow, const uint8_t r
 		while(cbyte < len)
 		{
 			// If this is the last byte, send the NACK Bit
-			if(cbyte == len) I2C1->CTLR1 &= ~I2C_CTLR1_ACK;
+			if(cbyte == len - 1) I2C1->CTLR1 &= ~I2C_CTLR1_ACK;
 
 			// Wait until the Read Register isn't empty
 			while(!(I2C1->STAR1 & I2C_STAR1_RXNE));
