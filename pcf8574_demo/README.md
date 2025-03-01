@@ -1,13 +1,13 @@
 
-# Example for a 24LC256 eeprom and CH32v003.
+# Example for a PCF8574 i2c port extender and CH32v003.
 
-A library file for a 24LC256 eeprom. 
+A library file for a PCF8574 port extender. 
 
-24LC256 eeprom Datasheet:  https://ww1.microchip.com/downloads/aemDocuments/documents/MPD/ProductDocuments/DataSheets/24AA256-24LC256-24FC256-256K-I2C-Serial-EEPROM-DS20001203.pdf
+PCF8574 i2c port extender Datasheet:  https://www.ti.com/lit/ds/symlink/pcf8574.pdf
 
 # Features
 
-1. Single header .h file for eeprom access.
+1. Single header .h file for adding 8 pins.
 2. Example of how to add your own files.
 
 # Additional libraries
