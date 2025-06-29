@@ -132,10 +132,21 @@ typedef struct
 {
   __IO uint32_t CTLR;
   __IO uint32_t SR;
-  __IO uint32_t CNTL;
-  __IO uint32_t CNTH;
-  __IO uint32_t CMPL;
-  __IO uint32_t CMPH;
+  union
+  {
+     struct
+     {
+        __IO uint32_t CNTL;
+        __IO uint32_t CNTH;
+        __IO uint32_t CMPL;
+        __IO uint32_t CMPH;
+     };
+     struct
+     {
+        __IO uint64_t CNT;
+        __IO uint64_t CMP;
+     };
+  };
 } SysTick_Type;
 
 
@@ -677,8 +688,6 @@ typedef struct
 
 
 
-#define USB_PHY_V33 (1<<6)
-#define USB_IOEN (1<<7)
 
 
 #define USBFSD_UEP_MOD_BASE         0x4002340C
@@ -867,7 +876,7 @@ typedef struct
 typedef struct
 {
 	__IO uint16_t CONFIG;
-	__IO uint16_t BCM_CLK_CNT;
+	__IO uint16_t BMC_CLK_CNT;
 
 	__IO uint8_t CONTROL;
 	__IO uint8_t TX_SEL;
@@ -880,7 +889,7 @@ typedef struct
 	__IO uint16_t PORT_CC1;
 	__IO uint16_t PORT_CC2;
 
-	__IO uint32_t USBPD_DMA;
+	__IO uint32_t DMA;
 } USBPD_DETAILED_TypeDef;
 
 
@@ -979,125 +988,13 @@ typedef struct{
 #define ESIG_BASE                               ((uint32_t)0x1FFFF7E0)
 #define INFO_BASE                               ((uint32_t)0x1FFFF704)
 
+#define EXTEN_BASE                              (AHBPERIPH_BASE + 0x3800)
 
 #define PFIC_BASE    (CORE_PERIPH_BASE + 0xE000)
 #define SysTick_BASE    (CORE_PERIPH_BASE + 0xF000)
 
 
 
-
-// AFIO CTLR Bits
-#define PB6_FILT_EN    (1<<27)
-#define PB5_FILT_EN    (1<<26)
-#define PA4_FILT_EN    (1<<25)
-#define PA3_FILT_EN    (1<<24)
-#define UDM_BC_CMPO	   (1<<19)
-#define UDP_BC_CMPO    (1<<17)
-#define UDM_BC_VSRC    (1<<17)
-#define UDP_BC_VSRC    (1<<16)
-#define USBPD_IN_HVT   (1<<9)
-#define USBPD_PHY_V33  (1<<8)
-#define USB_IOEN       (1<<7)
-#define USB_PHY_V33    (1<<6)
-#define UDP_PUE_00     (0b00<<2)
-#define UDP_PUE_01     (0b01<<2)
-#define UDP_PUE_10     (0b10<<2)
-#define UDP_PUE_11     (0b11<<2)
-#define UDM_PUE_00     (0b00<<0)
-#define UDM_PUE_01     (0b01<<0)
-#define UDM_PUE_10     (0b10<<0)
-#define UDM_PUE_11     (0b11<<0)
-#define UDP_PUE_MASK                0x0000000C
-#define UDP_PUE_DISABLE             0x00000000
-#define UDP_PUE_35UA                0x00000004
-#define UDP_PUE_10K                 0x00000008
-#define UDP_PUE_1K5                 0x0000000C
-#define UDM_PUE_MASK                0x00000003
-#define UDM_PUE_DISABLE             0x00000000
-#define UDM_PUE_35UA                0x00000001
-#define UDM_PUE_10K                 0x00000002
-#define UDM_PUE_1K5                 0x00000003
-
-
-// USB PD Bits
-#define IE_TX_END      (1<<15)
-#define IE_RX_RESET    (1<<14)
-#define IE_RX_ACT      (1<<13)
-#define IE_RX_BYTE     (1<<12)
-#define IE_RX_BIT      (1<<11)
-#define IE_PD_IO       (1<<10)
-#define WAKE_POLAR     (1<<5)
-#define PD_RST_EN      (1<<4)
-#define PD_DMA_EN      (1<<3)
-#define CC_SEL         (1<<2)
-#define PD_ALL_CLR     (1<<1)
-#define PD_FILT_EN     (1<<0)
-#define BMC_CLK_CNT_MASK  (0xff)
-
-//R8_CONTROL
-#define BMC_BYTE_HI    (1<<7)
-#define TX_BIT_BACK    (1<<6)
-#define DATA_FLAG      (1<<5)
-#define RX_STATE_MASK  (0x7<<2)
-#define RX_STATE_0     (1<<2)
-#define RX_STATE_1     (1<<3)
-#define RX_STATE_2     (1<<4)
-#define BMC_START      (1<<1)
-#define PD_TX_EN       (1<<0)
-
-#define TX_SEL4_MASK   (3<<6)
-#define TX_SEL4_0      (1<<6)
-#define TX_SEL4_1      (1<<7)
-
-#define TX_SEL3_MASK   (3<<4)
-#define TX_SEL3_0      (1<<4)
-#define TX_SEL3_1      (1<<5)
-
-#define TX_SEL2_MASK   (3<<2)
-#define TX_SEL2_0      (1<<2)
-#define TX_SEL2_1      (1<<3)
-
-#define TX_SEL1        (1<<0)
-
-#define BMC_TX_SZ_MASK (0x1ff)
-
-//R8_STATUS
-#define IF_TX_END      (1<<7)
-#define IF_RX_RESET    (1<<6)
-#define IF_RX_ACT      (1<<5)
-#define IF_RX_BYTE     (1<<4)
-#define IF_RX_BIT      (1<<3)
-#define IFBUF_ERR      (1<<2)
-#define BMC_AUX_MASK   (3<<0)
-#define BMC_AUX_1      (1<<1)
-#define BMC_AUX_0      (1<<0)
-
-// PORT CC1
-#define CC1_CE_MASK    (7<<5)
-#define CC1_CE_0       (1<<5)
-#define CC1_CE_1       (2<<5)
-#define CC1_CE_2       (4<<5)
-
-#define CC1_LVE        (1<<4)
-#define CC1_PU_MASK    (3<<2)
-#define CC1_PU_DISABLE (0<<2)
-#define CC1_PU_330uA   (1<<2)
-#define CC1_PU_180uA   (2<<2)
-#define CC1_PU_80uA    (3<<2)
-#define PA_CC1_AI      (1<<0)
-
-#define CC2_CE_MASK    (7<<5)
-#define CC2_CE_0       (1<<5)
-#define CC2_CE_1       (2<<5)
-#define CC2_CE_2       (4<<5)
-
-#define CC2_LVE        (1<<4)
-#define CC2_PU_MASK    (3<<2)
-#define CC2_PU_DISABLE (0<<2)
-#define CC2_PU_330uA   (1<<2)
-#define CC2_PU_180uA   (2<<2)
-#define CC2_PU_80uA    (3<<2)
-#define PA_CC2_AI      (1<<0)
 
 
 
@@ -2731,9 +2628,21 @@ typedef struct{
 #define AFIO_CTLR_UDM_PUE_0                     ((uint32_t)0x00000001) /* bit[0] */
 #define AFIO_CTLR_UDM_PUE_1                     ((uint32_t)0x00000002) /* bit[1] */
 
+#define UDM_PUE_MASK                0x00000003
+#define UDM_PUE_DISABLE             0x00000000
+#define UDM_PUE_35UA                0x00000001
+#define UDM_PUE_10K                 0x00000002
+#define UDM_PUE_1K5                 0x00000003
+
 #define AFIO_CTLR_UDP_PUE                       ((uint32_t)0x0000000C) /* PC17/UDP Pin pull-up Mode*/
 #define AFIO_CTLR_UDP_PUE_0                     ((uint32_t)0x00000004) /* bit[2] */
 #define AFIO_CTLR_UDP_PUE_1                     ((uint32_t)0x00000008) /* bit[3] */
+
+#define UDP_PUE_MASK                0x0000000C
+#define UDP_PUE_DISABLE             0x00000000
+#define UDP_PUE_35UA                0x00000004
+#define UDP_PUE_10K                 0x00000008
+#define UDP_PUE_1K5                 0x0000000C
 
 #define AFIO_CTLR_USB_PHY_V33                   ((uint32_t)0x00000040) /* USB transceiver PHY output and pull-up limiter configuration */
 #define AFIO_CTLR_USB_IOEN                      ((uint32_t)0x00000080) /* USB Remap pin enable */
@@ -2747,6 +2656,9 @@ typedef struct{
 #define AFIO_CTLR_PA4_FILT_EN                   ((uint32_t)0x02000000) /* Controls the input filtering of the PA4 pin */
 #define AFIO_CTLR_PB5_FILT_EN                   ((uint32_t)0x04000000) /* Controls the input filtering of the PB5 pin */
 #define AFIO_CTLR_PB6_FILT_EN                   ((uint32_t)0x08000000) /* Controls the input filtering of the PB6 pin */
+
+#define USB_IOEN       AFIO_CTLR_USB_IOEN
+#define USB_PHY_V33    AFIO_CTLR_USB_PHY_V33
 
 /******************************************************************************/
 /*                           Independent WATCHDOG                             */
@@ -3676,7 +3588,7 @@ extern "C" {
 
 ///* CTLR1 register Mask */
 //Editor's Note: Overloaded Definition
-#define ADC_CTLR1_CLEAR_Mask                 ((uint32_t)0xFFF0FEFF)
+#define ADC_CTLR1_CLEAR_MASK                 ((uint32_t)0xFFF0FEFF)
 
 /* ADC ADON mask */
 #define CTLR2_ADON_Set                   ((uint32_t)0x00000001)
@@ -3722,7 +3634,7 @@ extern "C" {
 #define CTLR2_TSVREFE_Reset              ((uint32_t)0xFF7FFFFF)
 
 /* CTLR2 register Mask */
-#define CTLR2_CLEAR_Mask                 ((uint32_t)0xFFF1F7FD)
+#define CTLR2_CLEAR_MASK                 ((uint32_t)0xFFF1F7FD)
 
 /* ADC SQx mask */
 #define RSQR3_SQ_Set                     ((uint32_t)0x0000001F)
@@ -3730,7 +3642,7 @@ extern "C" {
 #define RSQR1_SQ_Set                     ((uint32_t)0x0000001F)
 
 /* RSQR1 register Mask */
-#define RSQR1_CLEAR_Mask                 ((uint32_t)0xFF0FFFFF)
+#define RSQR1_CLEAR_MASK                 ((uint32_t)0xFF0FFFFF)
 
 /* ADC JSQx mask */
 #define ISQR_JSQ_Set                     ((uint32_t)0x0000001F)
@@ -3756,21 +3668,21 @@ extern "C" {
 /* ch32v00x_dma.c ------------------------------------------------------------*/
 
 /* DMA1 Channelx interrupt pending bit masks */
-#define DMA1_Channel1_IT_Mask    ((uint32_t)(DMA_GIF1 | DMA_TCIF1 | DMA_HTIF1 | DMA_TEIF1))
-#define DMA1_Channel2_IT_Mask    ((uint32_t)(DMA_GIF2 | DMA_TCIF2 | DMA_HTIF2 | DMA_TEIF2))
-#define DMA1_Channel3_IT_Mask    ((uint32_t)(DMA_GIF3 | DMA_TCIF3 | DMA_HTIF3 | DMA_TEIF3))
-#define DMA1_Channel4_IT_Mask    ((uint32_t)(DMA_GIF4 | DMA_TCIF4 | DMA_HTIF4 | DMA_TEIF4))
-#define DMA1_Channel5_IT_Mask    ((uint32_t)(DMA_GIF5 | DMA_TCIF5 | DMA_HTIF5 | DMA_TEIF5))
-#define DMA1_Channel6_IT_Mask    ((uint32_t)(DMA_GIF6 | DMA_TCIF6 | DMA_HTIF6 | DMA_TEIF6))
-#define DMA1_Channel7_IT_Mask    ((uint32_t)(DMA_GIF7 | DMA_TCIF7 | DMA_HTIF7 | DMA_TEIF7))
+#define DMA1_Channel1_IT_MASK    ((uint32_t)(DMA_GIF1 | DMA_TCIF1 | DMA_HTIF1 | DMA_TEIF1))
+#define DMA1_Channel2_IT_MASK    ((uint32_t)(DMA_GIF2 | DMA_TCIF2 | DMA_HTIF2 | DMA_TEIF2))
+#define DMA1_Channel3_IT_MASK    ((uint32_t)(DMA_GIF3 | DMA_TCIF3 | DMA_HTIF3 | DMA_TEIF3))
+#define DMA1_Channel4_IT_MASK    ((uint32_t)(DMA_GIF4 | DMA_TCIF4 | DMA_HTIF4 | DMA_TEIF4))
+#define DMA1_Channel5_IT_MASK    ((uint32_t)(DMA_GIF5 | DMA_TCIF5 | DMA_HTIF5 | DMA_TEIF5))
+#define DMA1_Channel6_IT_MASK    ((uint32_t)(DMA_GIF6 | DMA_TCIF6 | DMA_HTIF6 | DMA_TEIF6))
+#define DMA1_Channel7_IT_MASK    ((uint32_t)(DMA_GIF7 | DMA_TCIF7 | DMA_HTIF7 | DMA_TEIF7))
 
 
 /* DMA2 FLAG mask */
 // Editor's note: Overloaded Definition.
-#define DMA2_FLAG_Mask            ((uint32_t)0x10000000)
+#define DMA2_FLAG_MASK            ((uint32_t)0x10000000)
 
 /* DMA registers Masks */
-#define CFGR_CLEAR_Mask          ((uint32_t)0xFFFF800F)
+#define CFGR_CLEAR_MASK          ((uint32_t)0xFFFF800F)
 
 /* ch32v00x_exti.c -----------------------------------------------------------*/
 
@@ -3804,11 +3716,11 @@ extern "C" {
 #define SR_EOP                     ((uint32_t)0x00000020)
 
 /* FLASH Mask */
-#define RDPRT_Mask                 ((uint32_t)0x00000002)
-#define WRP0_Mask                  ((uint32_t)0x000000FF)
-#define WRP1_Mask                  ((uint32_t)0x0000FF00)
-#define WRP2_Mask                  ((uint32_t)0x00FF0000)
-#define WRP3_Mask                  ((uint32_t)0xFF000000)
+#define RDPRT_MASK                 ((uint32_t)0x00000002)
+#define WRP0_MASK                  ((uint32_t)0x000000FF)
+#define WRP1_MASK                  ((uint32_t)0x0000FF00)
+#define WRP2_MASK                  ((uint32_t)0x00FF0000)
+#define WRP3_MASK                  ((uint32_t)0xFF000000)
 
 /* FLASH Keys */
 #define RDP_Key                    ((uint16_t)0x00A5)
@@ -3872,7 +3784,7 @@ extern "C" {
 
 ////* I2C registers Masks */
 // Editor's note: Overloaded Definition.
-#define I2C_CTLR1_CLEAR_Mask         ((uint16_t)0xFBF5)
+#define I2C_CTLR1_CLEAR_MASK         ((uint16_t)0xFBF5)
 
 /* I2C DMAEN mask */
 #define CTLR2_DMAEN_Set          ((uint16_t)0x0800)
@@ -3904,10 +3816,10 @@ extern "C" {
 
 /* I2C FLAG mask */
 //Editor's Note: Overloaded Definition
-#define I2c_FLAG_Mask            ((uint32_t)0x00FFFFFF)
+#define I2c_FLAG_MASK            ((uint32_t)0x00FFFFFF)
 
 /* I2C Interrupt Enable mask */
-#define ITEN_Mask                ((uint32_t)0x07000000)
+#define ITEN_MASK                ((uint32_t)0x07000000)
 
 /* ch32v00x_iwdg.c -----------------------------------------------------------*/
 
@@ -3939,22 +3851,22 @@ extern "C" {
 #define CTLR_HSEBYP_Set            ((uint32_t)0x00040000)
 #define CTLR_HSEON_Reset           ((uint32_t)0xFFFEFFFF)
 #define CTLR_HSEON_Set             ((uint32_t)0x00010000)
-#define CTLR_HSITRIM_Mask          ((uint32_t)0xFFFFFF07)
+#define CTLR_HSITRIM_MASK          ((uint32_t)0xFFFFFF07)
 
-#define CFGR0_PLL_Mask             ((uint32_t)0xFFC0FFFF)
-#define CFGR0_PLLMull_Mask         ((uint32_t)0x003C0000)
-#define CFGR0_PLLSRC_Mask          ((uint32_t)0x00010000)
-#define CFGR0_PLLXTPRE_Mask        ((uint32_t)0x00020000)
-#define CFGR0_SWS_Mask             ((uint32_t)0x0000000C)
-#define CFGR0_SW_Mask              ((uint32_t)0xFFFFFFFC)
-#define CFGR0_HPRE_Reset_Mask      ((uint32_t)0xFFFFFF0F)
-#define CFGR0_HPRE_Set_Mask        ((uint32_t)0x000000F0)
-#define CFGR0_PPRE1_Reset_Mask     ((uint32_t)0xFFFFF8FF)
-#define CFGR0_PPRE1_Set_Mask       ((uint32_t)0x00000700)
-#define CFGR0_PPRE2_Reset_Mask     ((uint32_t)0xFFFFC7FF)
-#define CFGR0_PPRE2_Set_Mask       ((uint32_t)0x00003800)
-#define CFGR0_ADCPRE_Reset_Mask    ((uint32_t)0xFFFF07FF)
-#define CFGR0_ADCPRE_Set_Mask      ((uint32_t)0x0000F800)
+#define CFGR0_PLL_MASK             ((uint32_t)0xFFC0FFFF)
+#define CFGR0_PLLMull_MASK         ((uint32_t)0x003C0000)
+#define CFGR0_PLLSRC_MASK          ((uint32_t)0x00010000)
+#define CFGR0_PLLXTPRE_MASK        ((uint32_t)0x00020000)
+#define CFGR0_SWS_MASK             ((uint32_t)0x0000000C)
+#define CFGR0_SW_MASK              ((uint32_t)0xFFFFFFFC)
+#define CFGR0_HPRE_Reset_MASK      ((uint32_t)0xFFFFFF0F)
+#define CFGR0_HPRE_Set_MASK        ((uint32_t)0x000000F0)
+#define CFGR0_PPRE1_Reset_MASK     ((uint32_t)0xFFFFF8FF)
+#define CFGR0_PPRE1_Set_MASK       ((uint32_t)0x00000700)
+#define CFGR0_PPRE2_Reset_MASK     ((uint32_t)0xFFFFC7FF)
+#define CFGR0_PPRE2_Set_MASK       ((uint32_t)0x00003800)
+#define CFGR0_ADCPRE_Reset_MASK    ((uint32_t)0xFFFF07FF)
+#define CFGR0_ADCPRE_Set_MASK      ((uint32_t)0x0000F800)
 
 /* RSTSCKR register bit mask */
 #define RSTSCKR_RMVF_Set           ((uint32_t)0x01000000)
@@ -3962,7 +3874,7 @@ extern "C" {
 
 /* RCC Flag Mask */
 //Editor's Note: Overloaded Definition
-#define RCC_FLAG_Mask                  ((uint8_t)0x1F)
+#define RCC_FLAG_MASK                  ((uint8_t)0x1F)
 
 /* INTR register byte 2 (Bits[15:8]) base address */
 #define INTR_BYTE2_ADDRESS         ((uint32_t)0x40021009)
@@ -4001,15 +3913,15 @@ extern "C" {
 
 /* SPI registers Masks */
 //Editor's Note: Overloaded Definition
-#define SPI_CTLR1_CLEAR_Mask  ((uint16_t)0x3040)
-#define I2SCFGR_CLEAR_Mask    ((uint16_t)0xF040)
+#define SPI_CTLR1_CLEAR_MASK  ((uint16_t)0x3040)
+#define I2SCFGR_CLEAR_MASK    ((uint16_t)0xF040)
 
 
 
 /* ch32v00x_tim.c ------------------------------------------------------------*/
 
 /* TIM registers bit mask */
-#define SMCFGR_ETR_Mask    ((uint16_t)0x00FF)
+#define SMCFGR_ETR_MASK    ((uint16_t)0x00FF)
 #define CHCTLR_Offset      ((uint16_t)0x0018)
 #define CCER_CCE_Set       ((uint16_t)0x0001)
 #define CCER_CCNE_Set      ((uint16_t)0x0004)
@@ -4020,21 +3932,21 @@ extern "C" {
 #define CTLR1_UE_Set              ((uint16_t)0x2000) /* USART Enable Mask */
 #define CTLR1_UE_Reset            ((uint16_t)0xDFFF) /* USART Disable Mask */
 
-#define CTLR1_WAKE_Mask           ((uint16_t)0xF7FF) /* USART WakeUp Method Mask */
+#define CTLR1_WAKE_MASK           ((uint16_t)0xF7FF) /* USART WakeUp Method Mask */
 
 #define CTLR1_RWU_Set             ((uint16_t)0x0002) /* USART mute mode Enable Mask */
 #define CTLR1_RWU_Reset           ((uint16_t)0xFFFD) /* USART mute mode Enable Mask */
 #define CTLR1_SBK_Set             ((uint16_t)0x0001) /* USART Break Character send Mask */
 //Editor's Note: Overloaded Definition
-#define USART_CTLR1_CLEAR_Mask          ((uint16_t)0xE9F3) /* USART CR1 Mask */
-#define CTLR2_Address_Mask        ((uint16_t)0xFFF0) /* USART address Mask */
+#define USART_CTLR1_CLEAR_MASK          ((uint16_t)0xE9F3) /* USART CR1 Mask */
+#define CTLR2_Address_MASK        ((uint16_t)0xFFF0) /* USART address Mask */
 
 #define CTLR2_LINEN_Set           ((uint16_t)0x4000) /* USART LIN Enable Mask */
 #define CTLR2_LINEN_Reset         ((uint16_t)0xBFFF) /* USART LIN Disable Mask */
 
-#define CTLR2_LBDL_Mask           ((uint16_t)0xFFDF) /* USART LIN Break detection Mask */
-#define CTLR2_STOP_CLEAR_Mask     ((uint16_t)0xCFFF) /* USART CR2 STOP Bits Mask */
-#define CTLR2_CLOCK_CLEAR_Mask    ((uint16_t)0xF0FF) /* USART CR2 Clock Mask */
+#define CTLR2_LBDL_MASK           ((uint16_t)0xFFDF) /* USART LIN Break detection Mask */
+#define CTLR2_STOP_CLEAR_MASK     ((uint16_t)0xCFFF) /* USART CR2 STOP Bits Mask */
+#define CTLR2_CLOCK_CLEAR_MASK    ((uint16_t)0xF0FF) /* USART CR2 Clock Mask */
 
 #define CTLR3_SCEN_Set            ((uint16_t)0x0020) /* USART SC Enable Mask */
 #define CTLR3_SCEN_Reset          ((uint16_t)0xFFDF) /* USART SC Disable Mask */
@@ -4045,14 +3957,14 @@ extern "C" {
 #define CTLR3_HDSEL_Set           ((uint16_t)0x0008) /* USART Half-Duplex Enable Mask */
 #define CTLR3_HDSEL_Reset         ((uint16_t)0xFFF7) /* USART Half-Duplex Disable Mask */
 
-#define CTLR3_IRLP_Mask           ((uint16_t)0xFFFB) /* USART IrDA LowPower mode Mask */
-#define CTLR3_CLEAR_Mask          ((uint16_t)0xFCFF) /* USART CR3 Mask */
+#define CTLR3_IRLP_MASK           ((uint16_t)0xFFFB) /* USART IrDA LowPower mode Mask */
+#define CTLR3_CLEAR_MASK          ((uint16_t)0xFCFF) /* USART CR3 Mask */
 
 #define CTLR3_IREN_Set            ((uint16_t)0x0002) /* USART IrDA Enable Mask */
 #define CTLR3_IREN_Reset          ((uint16_t)0xFFFD) /* USART IrDA Disable Mask */
-#define GPR_LSB_Mask              ((uint16_t)0x00FF) /* Guard Time Register LSB Mask */
-#define GPR_MSB_Mask              ((uint16_t)0xFF00) /* Guard Time Register MSB Mask */
-#define IT_Mask                   ((uint16_t)0x001F) /* USART Interrupt Mask */
+#define GPR_LSB_MASK              ((uint16_t)0x00FF) /* Guard Time Register LSB Mask */
+#define GPR_MSB_MASK              ((uint16_t)0xFF00) /* Guard Time Register MSB Mask */
+#define IT_MASK                   ((uint16_t)0x001F) /* USART Interrupt Mask */
 
 /* USART OverSampling-8 Mask */
 #define CTLR1_OVER8_Set           ((uint16_t)0x8000) /* USART OVER8 mode Enable Mask */
@@ -4068,9 +3980,9 @@ extern "C" {
 #define CTLR_WDGA_Set      ((uint32_t)0x00000080)
 
 /* CFGR register bit mask */
-#define CFGR_WDGTB_Mask    ((uint32_t)0xFFFFFE7F)
-#define CFGR_W_Mask        ((uint32_t)0xFFFFFF80)
-#define BIT_Mask           ((uint8_t)0x7F)
+#define CFGR_WDGTB_MASK    ((uint32_t)0xFFFFFE7F)
+#define CFGR_W_MASK        ((uint32_t)0xFFFFFF80)
+#define BIT_MASK           ((uint8_t)0x7F)
 
 
 /* ch32v00x_adc.h ------------------------------------------------------------*/
@@ -6073,6 +5985,115 @@ typedef volatile unsigned long *PUINT32V;
 
 /* ch32v30x_usb.h ------------------------------------------------------------*/
 
+
+/* ch32x035_usbpd.h ----------------------------------------------------------*/
+
+/* Register Bit Definition */
+/* USBPD->CONFIG */
+#define PD_FILT_EN          (1<<0)             /* PD pin input filter enable */
+#define PD_ALL_CLR          (1<<1)             /* Clear all interrupt flags */
+#define CC_SEL              (1<<2)             /* Select PD communication port */
+#define PD_DMA_EN           (1<<3)             /* Enable DMA for USBPD */
+#define PD_RST_EN           (1<<4)             /* PD mode reset command enable */
+#define WAKE_POLAR          (1<<5)             /* PD port wake-up level */
+#define IE_PD_IO            (1<<10)            /* PD IO interrupt enable */
+#define IE_RX_BIT           (1<<11)            /* Receive bit interrupt enable */
+#define IE_RX_BYTE          (1<<12)            /* Receive byte interrupt enable */
+#define IE_RX_ACT           (1<<13)            /* Receive completion interrupt enable */
+#define IE_RX_RESET         (1<<14)            /* Reset interrupt enable */
+#define IE_TX_END           (1<<15)            /* Transfer completion interrupt enable */
+
+/* USBPD->CONTROL */
+#define PD_TX_EN            (1<<0)             /* USBPD transceiver mode and transmit enable */
+#define BMC_START           (1<<1)             /* BMC send start signal */
+#define RX_STATE_0          (1<<2)             /* PD received state bit 0 */
+#define RX_STATE_1          (1<<3)             /* PD received state bit 1 */
+#define RX_STATE_2          (1<<4)             /* PD received state bit 2 */
+#define DATA_FLAG           (1<<5)             /* Cache data valid flag bit */
+#define TX_BIT_BACK         (1<<6)             /* Indicates the current bit status of the BMC when sending the code */
+#define BMC_BYTE_HI         (1<<7)             /* Indicates the current half-byte status of the PD data being sent and received */
+
+/* USBPD->TX_SEL */
+#define TX_SEL1             (0<<0)
+#define TX_SEL1_SYNC1       (0<<0)             /* 0-SYNC1 */
+#define TX_SEL1_RST1        (1<<0)             /* 1-RST1 */
+#define TX_SEL2_MASK        (3<<2)
+#define TX_SEL2_SYNC1       (0<<2)             /* 00-SYNC1 */
+#define TX_SEL2_SYNC3       (1<<2)             /* 01-SYNC3 */
+#define TX_SEL2_RST1        (2<<2)             /* 1x-RST1 */
+#define TX_SEL3_MASK        (3<<4)
+#define TX_SEL3_SYNC1       (0<<4)             /* 00-SYNC1 */
+#define TX_SEL3_SYNC3       (1<<4)             /* 01-SYNC3 */
+#define TX_SEL3_RST1        (2<<4)             /* 1x-RST1 */
+#define TX_SEL4_MASK        (3<<6)
+#define TX_SEL4_SYNC2       (0<<6)             /* 00-SYNC2 */
+#define TX_SEL4_SYNC3       (1<<6)             /* 01-SYNC3 */
+#define TX_SEL4_RST2        (2<<6)             /* 1x-RST2 */
+
+/* USBPD->STATUS */
+#define BMC_AUX_MASK        (3<<0)              /* Clear BMC auxiliary information */
+#define BMC_AUX_INVALID     (0<<0)              /* 00-Invalid */
+#define BMC_AUX_SOP0        (1<<0)              /* 01-SOP0 */
+#define BMC_AUX_SOP1_HRST   (2<<0)              /* 10-SOP1 hard reset */
+#define BMC_AUX_SOP2_CRST   (3<<0)              /* 11-SOP2 cable reset */
+#define BUF_ERR             (1<<2)              /* BUFFER or DMA error interrupt flag */
+#define IF_RX_BIT           (1<<3)              /* Receive bit or 5bit interrupt flag */
+#define IF_RX_BYTE          (1<<4)              /* Receive byte or SOP interrupt flag */
+#define IF_RX_ACT           (1<<5)              /* Receive completion interrupt flag */
+#define IF_RX_RESET         (1<<6)              /* Receive reset interrupt flag */
+#define IF_TX_END           (1<<7)              /* Transfer completion interrupt flag */
+
+/* USBPD->PORT_CC1 */
+/* USBPD->PORT_CC2 */
+#define PA_CC_AI            (1<<0)               /* CC port comparator analogue input */
+#define CC_PD               (1<<1)               /* CC port pull-down resistor enable */
+#define CC_PU_MASK          (3<<2)               /* Clear CC port pull-up current */
+#define CC_NO_PU            (0<<2)               /* 00-Prohibit pull-up current */
+#define CC_PU_330           (1<<2)               /* 01-330uA */
+#define CC_PU_180           (2<<2)               /* 10-180uA */
+#define CC_PU_80            (3<<2)               /* 11-80uA */
+#define CC_LVE              (1<<4)               /* CC port output low voltage enable */
+#define CC_CMP_MASK         (7<<5)               /* Clear CC_CMP*/
+#define CC_NO_CMP           (0<<5)               /* 000-closed */
+#define CC_CMP_22           (2<<5)               /* 010-0.22V */
+#define CC_CMP_45           (3<<5)               /* 011-0.45V */
+#define CC_CMP_55           (4<<5)               /* 100-0.55V */
+#define CC_CMP_66           (5<<5)               /* 101-0.66V */
+#define CC_CMP_95           (6<<5)               /* 110-0.95V */
+#define CC_CMP_123          (7<<5)               /* 111-1.23V */
+#define USBPD_IN_HVT        (1<<9)
+
+
+/*********************************************************
+ * PD pin PC14/PC15 high threshold input mode:
+ * 1-High threshold input (2.2V typical), to reduce the I/O power consumption during PD communication
+ * 0-Normal GPIO threshold input
+ * *******************************************************/
+#define USBPD_PHY_V33       (1<<8)
+/**********************************************************
+* PD transceiver PHY pull-up limit configuration bits:
+* 1-Direct use of VDD for GPIO applications or PD applications with VDD voltage of 3.3V
+* 0-LDO buck enabled, limited to approx 3.3V, for PD applications with VDD more than 4V
+* ********************************************************/
+
+#define PIN_CC1                    GPIO_Pin_14
+#define PIN_CC2                    GPIO_Pin_15
+
+/******************************************************************************/
+
+#define UPD_TMR_TX (FUNCONF_SYSTEM_CORE_CLOCK / 600000 - 1)
+#define UPD_TMR_RX (FUNCONF_SYSTEM_CORE_CLOCK / 400000 - 1)
+
+#define MASK_PD_STAT      0x03                                               /* Bit mask for current PD status */
+#define PD_RX_SOP0        0x01                                               /* SOP0 received */
+#define PD_RX_SOP1_HRST   0x02                                               /* SOP1 or Hard Reset received */
+#define PD_RX_SOP2_CRST   0x03                                               /* SOP2 or Cable Reset received */
+
+#define UPD_SOP0          ( TX_SEL1_SYNC1 | TX_SEL2_SYNC1 | TX_SEL3_SYNC1 | TX_SEL4_SYNC2 )     /* SOP1 */
+#define UPD_SOP1          ( TX_SEL1_SYNC1 | TX_SEL2_SYNC1 | TX_SEL3_SYNC3 | TX_SEL4_SYNC3 )     /* SOP2 */
+#define UPD_SOP2          ( TX_SEL1_SYNC1 | TX_SEL2_SYNC3 | TX_SEL3_SYNC1 | TX_SEL4_SYNC3 )     /* SOP3 */
+#define UPD_HARD_RESET    ( TX_SEL1_RST1  | TX_SEL2_RST1  | TX_SEL3_RST1  | TX_SEL4_RST2  )     /* Hard Reset*/
+#define UPD_CABLE_RESET   ( TX_SEL1_RST1  | TX_SEL2_SYNC1 | TX_SEL3_RST1  | TX_SEL4_SYNC3 )     /* Cable Reset*/
 
 /* ch32v00x_wwdg.h -----------------------------------------------------------*/
 
